@@ -2,36 +2,124 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Task Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${task.id == null ? 'Create Task' : 'Edit Task'}">Task Form</title>
     <style>
-        body { font-family: sans-serif; margin: 2rem; max-width: 600px; }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
-        input[type="text"], textarea { width: 100%; padding: 0.5rem; box-sizing: border-box; }
-        .btn { padding: 0.5rem 1rem; border: none; background-color: #007bff; color: white; cursor: pointer; border-radius: 4px; }
-        .btn-cancel { background-color: #6c757d; }
-        a { text-decoration: none; color: inherit; }
+        :root {
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ced4da;
+            --card-bg: #fff;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus, textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+        }
+        .help-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1rem;
+            text-align: center;
+            flex: 1;
+            transition: background-color 0.2s;
+            text-decoration: none;
+        }
+        .btn:hover { background-color: var(--primary-hover); }
+        .btn-cancel {
+            background-color: #f8f9fa;
+            color: #495057;
+            border: 1px solid #ced4da;
+        }
+        .btn-cancel:hover { background-color: #e2e6ea; }
+
+        @media (max-width: 600px) {
+            .container { margin: 20px 10px; padding: 20px; }
+            .form-actions { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
-    <h1 th:text="${task.id == null ? 'Create Task' : 'Edit Task'}">Task</h1>
+    <div class="container">
+        <h1 th:text="${task.id == null ? 'Create New Task' : 'Edit Task'}">Task</h1>
 
-    <form th:action="${task.id == null ? '/tasks' : '/tasks/' + task.id}" th:object="${task}" method="post">
-        <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" id="title" th:field="*{title}" required>
-        </div>
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" th:field="*{description}" rows="4"></textarea>
-        </div>
-        <div class="form-group">
-            <label for="tagsString">Tags (comma separated)</label>
-            <input type="text" id="tagsString" name="tagsString" th:value="${tagsString}" placeholder="e.g. work, urgent, home">
-        </div>
+        <form th:action="${task.id == null ? '/tasks' : '/tasks/' + task.id}" th:object="${task}" method="post">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" th:field="*{title}" required placeholder="What needs to be done?">
+            </div>
 
-        <button type="submit" class="btn">Save</button>
-        <a href="/" class="btn btn-cancel">Cancel</a>
-    </form>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" th:field="*{description}" rows="5" placeholder="Add more details..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="tagsString">Tags</label>
+                <input type="text" id="tagsString" name="tagsString" th:value="${tagsString}" placeholder="work, urgent, home">
+                <div class="help-text">Separate tags with commas.</div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn">Save Task</button>
+                <a href="/" class="btn btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

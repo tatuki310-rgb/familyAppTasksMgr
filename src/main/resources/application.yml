@@ -25,7 +25,10 @@ spring:
             authorization-grant-type: authorization_code
         provider:
           cognito:
-            issuer-uri: ${COGNITO_ISSUER_URI:https://cognito-idp.us-east-1.amazonaws.com/us-east-1_placeholder}
+            authorization-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_placeholder/oauth2/authorize
+            token-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_placeholder/oauth2/token
+            jwk-set-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_placeholder/.well-known/jwks.json
+            user-info-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_placeholder/oauth2/userInfo
             user-name-attribute: sub
 
 server:

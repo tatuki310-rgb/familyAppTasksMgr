@@ -1,5 +1,5 @@
 version: 1.0
-runtime: GENERIC
+runtime: java21
 build:
   commands:
     build:
