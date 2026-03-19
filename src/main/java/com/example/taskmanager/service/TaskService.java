@@ -30,9 +30,6 @@ public class TaskService {
         task.setId(UUID.randomUUID().toString());
         task.setOwnerId(owner.getId());
         task.setTags(processTags(tagsString));
-        if (task.getSharedUsersIds() == null) {
-            task.setSharedUsersIds(new HashSet<>());
-        }
         return taskRepository.save(task);
     }
 
@@ -66,31 +63,34 @@ public class TaskService {
             }
 
             if (userOpt.isPresent()) {
-                if(task.getSharedUsersIds() == null) {
-                    task.setSharedUsersIds(new HashSet<>());
+                // 既存のセットを取得、なければ新しく作る（保存前だけ一時的に使う）
+                Set<String> sharedIds = task.getSharedUsersIds();
+                if (sharedIds == null) {
+                    sharedIds = new HashSet<>();
                 }
-                task.getSharedUsersIds().add(userOpt.get().getId());
+                sharedIds.add(userOpt.get().getId());
+                
+                task.setSharedUsersIds(sharedIds); // 値が入った状態のセットを渡す
                 taskRepository.save(task);
-            } else {
-                throw new RuntimeException("User not found: " + usernameOrEmail);
             }
         }
     }
 
     private Set<String> processTags(String tagsString) {
+        if (tagsString == null || tagsString.trim().isEmpty()) {
+            return null; // 空なら null を返す
+        }
         Set<String> tags = new HashSet<>();
-        if (tagsString != null && !tagsString.trim().isEmpty()) {
-            String[] tagNames = tagsString.split(",");
-            for (String name : tagNames) {
-                String cleanName = name.trim().toLowerCase();
-                if (!cleanName.isEmpty()) {
-                    tags.add(cleanName);
-                }
+        String[] tagNames = tagsString.split(",");
+        for (String name : tagNames) {
+            String cleanName = name.trim().toLowerCase();
+            if (!cleanName.isEmpty()) {
+                tags.add(cleanName);
             }
         }
-        return tags;
+        return tags.isEmpty() ? null : tags; // 最終的に空なら null
     }
-
+ 
     // Helper to get actual AppUser objects for Thymeleaf
     public AppUser getUserById(String userId) {
         return appUserRepository.findById(userId).orElse(null);
