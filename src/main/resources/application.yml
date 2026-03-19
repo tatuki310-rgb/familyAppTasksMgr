@@ -4,18 +4,16 @@ spring:
       client:
         registration:
           cognito:
-            client-id: ${COGNITO_CLIENT_ID:placeholder-client-id}
-            client-secret: ${COGNITO_CLIENT_SECRET:placeholder-client-secret}
+            client-id: ${COGNITO_CLIENT_ID}
+            client-secret: ${COGNITO_CLIENT_SECRET}
             scope: openid, profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             client-name: "Amazon Cognito"
             authorization-grant-type: authorization_code
         provider:
           cognito:
-            authorization-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_placeholder/oauth2/authorize
-            token-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_placeholder/oauth2/token
-            jwk-set-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_placeholder/.well-known/jwks.json
-            user-info-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_placeholder/oauth2/userInfo
+          cognito:
+            issuer-uri: ${COGNITO_ISSUER_URI}
             user-name-attribute: sub
 
 server:
