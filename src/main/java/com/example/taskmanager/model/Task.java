@@ -22,12 +22,10 @@ public class Task {
     private String ownerId;
 
     // Set of User IDs (Cognito Subs) this task is shared with
-    @Builder.Default
-    private Set<String> sharedUsersIds = new HashSet<>();
-
     // Set of simple tag strings
-    @Builder.Default
-    private Set<String> tags = new HashSet<>();
+    // @Builder.Default は削除
+    private Set<String> sharedUsersIds;
+    private Set<String> tags;
 
     @DynamoDbPartitionKey
     public String getId() {
