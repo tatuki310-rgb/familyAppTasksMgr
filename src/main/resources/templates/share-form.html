@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Share Task</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; max-width: 600px; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 0.5rem; box-sizing: border-box; }
+        .btn { padding: 0.5rem 1rem; border: none; background-color: #28a745; color: white; cursor: pointer; border-radius: 4px; }
+        .btn-cancel { background-color: #6c757d; }
+        a { text-decoration: none; color: inherit; }
+        .message { color: green; margin-bottom: 1rem; }
+        .error { color: red; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <h1>Share Task</h1>
+    <h2 th:text="${task.title}">Task Title</h2>
+
+    <div th:if="${message}" class="message" th:text="${message}"></div>
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+
+    <form th:action="@{/tasks/{id}/share(id=${task.id})}" method="post">
+        <div class="form-group">
+            <label for="usernameOrEmail">User's Username or Email</label>
+            <input type="text" id="usernameOrEmail" name="usernameOrEmail" required placeholder="Enter username or email to share with">
+        </div>
+
+        <button type="submit" class="btn">Share</button>
+        <a href="/" class="btn btn-cancel">Back to Tasks</a>
+    </form>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Manager</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; }
+        .task-list { margin-top: 1rem; }
+        .task { border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; }
+        .tags { font-size: 0.8rem; color: #666; }
+        .actions { margin-top: 0.5rem; }
+        .btn { padding: 0.5rem 1rem; text-decoration: none; border: 1px solid #000; color: #000; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Task Manager</h1>
+
+    <div sec:authorize="!isAuthenticated()">
+        <p>Please log in to manage your tasks.</p>
+        <a href="/oauth2/authorization/cognito" class="btn">Log in with Cognito</a>
+    </div>
+
+    <div sec:authorize="isAuthenticated()">
+        <p>Welcome, <span sec:authentication="principal.attributes['email']">User</span>!</p>
+        <p>Your Username: <span th:text="${currentUser != null ? currentUser.username : ''}"></span></p>
+        <a href="/logout" class="btn">Log out</a>
+
+        <h2>Your Tasks</h2>
+        <a href="/tasks/new" class="btn">Create New Task</a>
+
+        <div class="task-list">
+            <div th:each="task : ${ownedTasks}" class="task">
+                <h3 th:text="${task.title}">Task Title</h3>
+                <p th:text="${task.description}">Task Description</p>
+                <div class="tags">
+                    Tags: <span th:each="tag, iterStat : ${task.tags}" th:text="!${iterStat.last} ? ${tag.name} + ', ' : ${tag.name}">Tag</span>
+                </div>
+                <div class="actions">
+                    <a th:href="@{/tasks/{id}/edit(id=${task.id})}" class="btn">Edit</a>
+                    <a th:href="@{/tasks/{id}/delete(id=${task.id})}" class="btn" onclick="return confirm('Are you sure?')">Delete</a>
+                    <a th:href="@{/tasks/{id}/share(id=${task.id})}" class="btn">Share</a>
+                </div>
+                <div th:if="${!task.sharedUsers.isEmpty()}" style="margin-top: 0.5rem; font-size: 0.9rem;">
+                    Shared with: <span th:each="user, iterStat : ${task.sharedUsers}" th:text="!${iterStat.last} ? ${user.username} + ', ' : ${user.username}">User</span>
+                </div>
+            </div>
+        </div>
+
+        <h2>Shared with you</h2>
+        <div class="task-list">
+            <div th:each="task : ${sharedTasks}" class="task">
+                <h3 th:text="${task.title} + ' (Owner: ' + ${task.owner.username} + ')'">Task Title</h3>
+                <p th:text="${task.description}">Task Description</p>
+                <div class="tags">
+                    Tags: <span th:each="tag, iterStat : ${task.tags}" th:text="!${iterStat.last} ? ${tag.name} + ', ' : ${tag.name}">Tag</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
