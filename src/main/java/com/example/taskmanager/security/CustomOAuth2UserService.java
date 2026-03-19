@@ -31,17 +31,16 @@ public class CustomOAuth2UserService implements OAuth2UserService<OidcUserReques
             username = email != null ? email.split("@")[0] : "user_" + sub.substring(0, 8);
         }
 
-        Optional<AppUser> userOptional = appUserRepository.findByCognitoSub(sub);
+        Optional<AppUser> userOptional = appUserRepository.findById(sub);
 
         AppUser appUser;
         if (userOptional.isPresent()) {
             appUser = userOptional.get();
-            // Update email or username if changed in Cognito
             appUser.setEmail(email);
             appUser.setUsername(username);
         } else {
             appUser = AppUser.builder()
-                    .cognitoSub(sub)
+                    .id(sub)
                     .email(email)
                     .username(username)
                     .build();

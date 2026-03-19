@@ -180,8 +180,8 @@
                     <h3 class="task-title" th:text="${task.title}">Task Title</h3>
                     <div class="task-desc" th:text="${task.description}">Task Description</div>
 
-                    <div class="tags" th:if="${!task.tags.isEmpty()}">
-                        <span class="tag" th:each="tag : ${task.tags}" th:text="${tag.name}">Tag</span>
+                    <div class="tags" th:if="${task.tags != null && !task.tags.isEmpty()}">
+                        <span class="tag" th:each="tag : ${task.tags}" th:text="${tag}">Tag</span>
                     </div>
 
                     <div class="actions">
@@ -192,13 +192,13 @@
                         </form>
                     </div>
 
-                    <div th:if="${!task.sharedUsers.isEmpty()}" class="shared-info">
-                        Shared with: <span th:each="user, iterStat : ${task.sharedUsers}" th:text="!${iterStat.last} ? ${user.username} + ', ' : ${user.username}">User</span>
+                    <div th:if="${task.sharedUsersIds != null && !task.sharedUsersIds.isEmpty()}" class="shared-info">
+                        Shared with: <span th:each="userId, iterStat : ${task.sharedUsersIds}" th:text="!${iterStat.last} ? ${taskService.getUserById(userId)?.username} + ', ' : ${taskService.getUserById(userId)?.username}">User</span>
                     </div>
                 </div>
             </div>
 
-            <div th:if="${!sharedTasks.isEmpty()}">
+            <div th:if="${sharedTasks != null && !sharedTasks.isEmpty()}">
                 <div class="section-header" style="margin-top: 40px;">
                     <h2>Shared With Me</h2>
                 </div>
@@ -207,12 +207,12 @@
                     <div th:each="task : ${sharedTasks}" class="task">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                             <h3 class="task-title" style="margin-bottom:0;" th:text="${task.title}">Task Title</h3>
-                            <span class="tag" style="background-color: #cce5ff; color: #004085;">From: <span th:text="${task.owner.username}"></span></span>
+                            <span class="tag" style="background-color: #cce5ff; color: #004085;">From: <span th:text="${taskService.getUserById(task.ownerId)?.username}"></span></span>
                         </div>
                         <div class="task-desc" th:text="${task.description}">Task Description</div>
 
-                        <div class="tags" th:if="${!task.tags.isEmpty()}">
-                            <span class="tag" th:each="tag : ${task.tags}" th:text="${tag.name}">Tag</span>
+                        <div class="tags" th:if="${task.tags != null && !task.tags.isEmpty()}">
+                            <span class="tag" th:each="tag : ${task.tags}" th:text="${tag}">Tag</span>
                         </div>
                     </div>
                 </div>

@@ -1,48 +1,36 @@
 package com.example.taskmanager.model;
 
-import jakarta.persistence.*;
 import lombok.*;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
-@Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@DynamoDbBean
 public class Task {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
+    private String id;
     private String title;
-
-    @Column(length = 2000)
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private AppUser owner;
+    // Storing owner's ID (Cognito Sub)
+    private String ownerId;
 
-    @ManyToMany
-    @JoinTable(
-            name = "task_shared_users",
-            joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    // Set of User IDs (Cognito Subs) this task is shared with
     @Builder.Default
-    private Set<AppUser> sharedUsers = new HashSet<>();
+    private Set<String> sharedUsersIds = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "task_tags",
-            joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
+    // Set of simple tag strings
     @Builder.Default
-    private Set<Tag> tags = new HashSet<>();
+    private Set<String> tags = new HashSet<>();
+
+    @DynamoDbPartitionKey
+    public String getId() {
+        return id;
+    }
 }

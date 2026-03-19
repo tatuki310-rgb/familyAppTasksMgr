@@ -1,27 +1,21 @@
 package com.example.taskmanager.model;
 
-import jakarta.persistence.*;
 import lombok.*;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
-@Entity
-@Table(name = "app_user")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@DynamoDbBean
 public class AppUser {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, unique = true)
+    private String id; // Cognito Sub serves as the unique ID for simplicity
     private String username;
-
-    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "cognito_sub", unique = true)
-    private String cognitoSub;
+    @DynamoDbPartitionKey
+    public String getId() {
+        return id;
+    }
 }

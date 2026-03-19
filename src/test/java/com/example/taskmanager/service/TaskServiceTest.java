@@ -1,10 +1,8 @@
 package com.example.taskmanager.service;
 
 import com.example.taskmanager.model.AppUser;
-import com.example.taskmanager.model.Tag;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.repository.AppUserRepository;
-import com.example.taskmanager.repository.TagRepository;
 import com.example.taskmanager.repository.TaskRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,9 +24,6 @@ public class TaskServiceTest {
     private TaskRepository taskRepository;
 
     @Mock
-    private TagRepository tagRepository;
-
-    @Mock
     private AppUserRepository appUserRepository;
 
     @InjectMocks
@@ -35,44 +31,45 @@ public class TaskServiceTest {
 
     @Test
     public void testCreateTask() {
-        AppUser owner = AppUser.builder().id(1L).username("testuser").build();
+        AppUser owner = AppUser.builder().id("user-1").username("testuser").build();
         Task taskToCreate = Task.builder().title("Test Task").description("Test Description").build();
 
-        when(tagRepository.findByName("urgent")).thenReturn(Optional.of(Tag.builder().id(1L).name("urgent").build()));
         when(taskRepository.save(any(Task.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Task createdTask = taskService.createTask(taskToCreate, owner, "urgent, work");
 
         assertNotNull(createdTask);
-        assertEquals(owner, createdTask.getOwner());
+        assertEquals(owner.getId(), createdTask.getOwnerId());
         assertEquals(2, createdTask.getTags().size());
+        assertTrue(createdTask.getTags().contains("urgent"));
+        assertTrue(createdTask.getTags().contains("work"));
         verify(taskRepository, times(1)).save(taskToCreate);
     }
 
     @Test
     public void testShareTask_Success() {
-        Task task = Task.builder().id(1L).title("Test").build();
-        AppUser userToShareWith = AppUser.builder().id(2L).username("friend").build();
+        Task task = Task.builder().id("task-1").title("Test").build();
+        AppUser userToShareWith = AppUser.builder().id("user-2").username("friend").build();
 
-        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(taskRepository.findById("task-1")).thenReturn(Optional.of(task));
         when(appUserRepository.findByUsername("friend")).thenReturn(Optional.of(userToShareWith));
 
-        taskService.shareTask(1L, "friend");
+        taskService.shareTask("task-1", "friend");
 
-        assertTrue(task.getSharedUsers().contains(userToShareWith));
+        assertTrue(task.getSharedUsersIds().contains(userToShareWith.getId()));
         verify(taskRepository, times(1)).save(task);
     }
 
     @Test
     public void testShareTask_UserNotFound() {
-        Task task = Task.builder().id(1L).title("Test").build();
+        Task task = Task.builder().id("task-1").title("Test").build();
 
-        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(taskRepository.findById("task-1")).thenReturn(Optional.of(task));
         when(appUserRepository.findByUsername("unknown")).thenReturn(Optional.empty());
         when(appUserRepository.findByEmail("unknown")).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            taskService.shareTask(1L, "unknown");
+            taskService.shareTask("task-1", "unknown");
         });
 
         assertEquals("User not found: unknown", exception.getMessage());

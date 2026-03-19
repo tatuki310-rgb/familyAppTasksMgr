@@ -1,52 +1,46 @@
 package com.example.taskmanager.service;
 
 import com.example.taskmanager.model.AppUser;
-import com.example.taskmanager.model.Tag;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.repository.AppUserRepository;
-import com.example.taskmanager.repository.TagRepository;
 import com.example.taskmanager.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
-@Transactional
 public class TaskService {
 
     @Autowired
     private TaskRepository taskRepository;
 
     @Autowired
-    private TagRepository tagRepository;
-
-    @Autowired
     private AppUserRepository appUserRepository;
 
     public List<Task> getOwnedTasks(AppUser user) {
-        return taskRepository.findByOwner(user);
+        return taskRepository.findByOwnerId(user.getId());
     }
 
     public List<Task> getSharedTasks(AppUser user) {
-        return taskRepository.findBySharedUsersContaining(user);
+        return taskRepository.findBySharedUserContaining(user.getId());
     }
 
     public Task createTask(Task task, AppUser owner, String tagsString) {
-        task.setOwner(owner);
+        task.setId(UUID.randomUUID().toString());
+        task.setOwnerId(owner.getId());
         task.setTags(processTags(tagsString));
+        if (task.getSharedUsersIds() == null) {
+            task.setSharedUsersIds(new HashSet<>());
+        }
         return taskRepository.save(task);
     }
 
-    public Optional<Task> getTaskById(Long id) {
+    public Optional<Task> getTaskById(String id) {
         return taskRepository.findById(id);
     }
 
-    public Task updateTask(Long id, Task taskDetails, String tagsString) {
+    public Task updateTask(String id, Task taskDetails, String tagsString) {
         Optional<Task> taskOpt = taskRepository.findById(id);
         if (taskOpt.isPresent()) {
             Task task = taskOpt.get();
@@ -58,11 +52,11 @@ public class TaskService {
         throw new RuntimeException("Task not found");
     }
 
-    public void deleteTask(Long id) {
+    public void deleteTask(String id) {
         taskRepository.deleteById(id);
     }
 
-    public void shareTask(Long taskId, String usernameOrEmail) {
+    public void shareTask(String taskId, String usernameOrEmail) {
         Optional<Task> taskOpt = taskRepository.findById(taskId);
         if (taskOpt.isPresent()) {
             Task task = taskOpt.get();
@@ -72,7 +66,10 @@ public class TaskService {
             }
 
             if (userOpt.isPresent()) {
-                task.getSharedUsers().add(userOpt.get());
+                if(task.getSharedUsersIds() == null) {
+                    task.setSharedUsersIds(new HashSet<>());
+                }
+                task.getSharedUsersIds().add(userOpt.get().getId());
                 taskRepository.save(task);
             } else {
                 throw new RuntimeException("User not found: " + usernameOrEmail);
@@ -80,19 +77,22 @@ public class TaskService {
         }
     }
 
-    private Set<Tag> processTags(String tagsString) {
-        Set<Tag> tags = new HashSet<>();
+    private Set<String> processTags(String tagsString) {
+        Set<String> tags = new HashSet<>();
         if (tagsString != null && !tagsString.trim().isEmpty()) {
             String[] tagNames = tagsString.split(",");
             for (String name : tagNames) {
                 String cleanName = name.trim().toLowerCase();
                 if (!cleanName.isEmpty()) {
-                    Tag tag = tagRepository.findByName(cleanName)
-                            .orElseGet(() -> tagRepository.save(Tag.builder().name(cleanName).build()));
-                    tags.add(tag);
+                    tags.add(cleanName);
                 }
             }
         }
         return tags;
+    }
+
+    // Helper to get actual AppUser objects for Thymeleaf
+    public AppUser getUserById(String userId) {
+        return appUserRepository.findById(userId).orElse(null);
     }
 }
