@@ -37,7 +37,9 @@
                 </div>
                 <div class="actions">
                     <a th:href="@{/tasks/{id}/edit(id=${task.id})}" class="btn">Edit</a>
-                    <a th:href="@{/tasks/{id}/delete(id=${task.id})}" class="btn" onclick="return confirm('Are you sure?')">Delete</a>
+                    <form th:action="@{/tasks/{id}/delete(id=${task.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
                     <a th:href="@{/tasks/{id}/share(id=${task.id})}" class="btn">Share</a>
                 </div>
                 <div th:if="${!task.sharedUsers.isEmpty()}" style="margin-top: 0.5rem; font-size: 0.9rem;">

@@ -86,7 +86,7 @@ public class TaskController {
         return "redirect:/";
     }
 
-    @GetMapping("/tasks/{id}/delete")
+    @PostMapping("/tasks/{id}/delete")
     public String deleteTask(@PathVariable Long id, @AuthenticationPrincipal OAuth2User principal) {
         Task task = taskService.getTaskById(id).orElseThrow();
         AppUser currentUser = getCurrentUser(principal);
